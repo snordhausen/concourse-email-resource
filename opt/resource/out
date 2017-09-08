@@ -41,7 +41,7 @@ def put(src):
     add_attachments(message, payload)
 
     with postfix():
-        with SMTP('localhost') as smtp:
+        with SMTP(**get_smtp_kwargs(payload)) as smtp:
             smtp.send_message(message)
             # This is lame, but it seems to take a while until postfix delivers the message
             time.sleep(1)
@@ -141,6 +141,12 @@ def postfix():
 def postfix_cmd(command):
     devnull = open(os.devnull, 'w')
     sub.check_call(['postfix', command], stdout=devnull, stderr=sub.STDOUT)
+
+
+def get_smtp_kwargs(payload):
+    host = get_value_from_payload(payload, 'params', 'host', default='localhost', optional=True)
+    port = get_value_from_payload(payload, 'params', 'port', default=0, optional=True)
+    return {'host': host, 'port': port}
 
 
 if __name__ == '__main__':
