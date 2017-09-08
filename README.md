@@ -36,6 +36,7 @@ Sending an email message:
     to: [recipient@example.com]
     subject: subject.txt
     body: body.txt
+    host: smtp.mydomain.invalid
 ```
 
 ## Behavior
@@ -53,7 +54,7 @@ Sending an email message:
 * `type`: _(optional)_ The MIME subtype (defaults to `"html"`)
 * `inline_css`: _(optional)_ Inline CSS to style attributes in HTML.
 * `attachments`: A list of file names that will be attached to the email. Attachments only work if `type` is `"html"`.
-* `host`: _(optional)_ SMTP host name
+* `host`: _(mandatory)_ SMTP host name
 * `port`: _(optional)_ SMTP host port
 
 `subject|subject_text` and `body|body_text` can both either be plain text, html or a [jinja](http://jinja.pocoo.org/docs/dev/)-template.
@@ -82,6 +83,7 @@ A more elaborate usage example would look like this:
     subject: subject
     body: body.html
     vars: vars.json
+    host: smtp.mydomain.invalid
 ```
 
 or for a plain text example:
@@ -93,5 +95,6 @@ or for a plain text example:
     subject: subject.txt
     body: body.txt
     type: plain
+    host: smtp.mydomain.invalid
 ```
 
