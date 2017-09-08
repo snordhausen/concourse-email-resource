@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 from datetime import datetime
-from contextlib import contextmanager
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -10,9 +9,7 @@ from html2text import html2text
 import json
 import os
 from smtplib import SMTP
-import subprocess as sub
 import sys
-import time
 
 from inlinestyler.utils import inline_css
 from jinja2 import Template
@@ -40,11 +37,8 @@ def put(src):
     message['To'] = ', '.join(get_recipients(src, payload))
     add_attachments(message, payload)
 
-    with postfix():
-        with SMTP('localhost') as smtp:
-            smtp.send_message(message)
-            # This is lame, but it seems to take a while until postfix delivers the message
-            time.sleep(1)
+    with SMTP(**get_smtp_kwargs(payload)) as smtp:
+        smtp.send_message(message)
 
     print(json.dumps({
         'version': {'version': datetime.isoformat(datetime.now())},
@@ -130,17 +124,10 @@ def get_value_from_payload(payload, section, key, default=None, optional=False):
     return default
 
 
-@contextmanager
-def postfix():
-    postfix_cmd('start')
-    yield
-    postfix_cmd('flush')
-    postfix_cmd('stop')
-
-
-def postfix_cmd(command):
-    devnull = open(os.devnull, 'w')
-    sub.check_call(['postfix', command], stdout=devnull, stderr=sub.STDOUT)
+def get_smtp_kwargs(payload):
+    host = get_value_from_payload(payload, 'params', 'host')
+    port = get_value_from_payload(payload, 'params', 'port', default=0, optional=True)
+    return {'host': host, 'port': port}
 
 
 if __name__ == '__main__':
