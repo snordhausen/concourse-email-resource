@@ -35,7 +35,7 @@ def put(src):
     message['Subject'] = subject
     message['From'] = get_sender(payload)
     message['To'] = ', '.join(get_recipients(src, payload))
-    add_attachments(message, payload)
+    add_attachments(message, src, payload)
 
     with SMTP(**get_smtp_kwargs(payload)) as smtp:
         smtp.send_message(message)
@@ -63,18 +63,20 @@ def get_recipients(src, payload):
     return recipients
 
 
-def add_attachments(message, payload):
+def add_attachments(message, src, payload):
     file_names = get_value_from_payload(payload, 'params', 'attachments', default=[], optional=True)
     for file_name in file_names:
+        file_name = os.path.join(src, file_name)
         message.attach(get_attachment(file_name))
 
 
 def get_attachment(file_name):
     attachment = MIMEBase('application', 'octet-stream')
-    with open(file_name) as fp:
+    with open(file_name, 'rb') as fp:
         attachment.set_payload(fp.read())
     encoders.encode_base64(attachment)
-    attachment.add_header('Content-Disposition', 'attachment', filename=file_name)
+    attachment.add_header('Content-Disposition', 'attachment',
+                          filename=os.path.basename(file_name))
     return attachment
 
 
