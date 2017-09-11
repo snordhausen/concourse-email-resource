@@ -75,7 +75,8 @@ def get_attachment(file_name):
     with open(file_name, 'rb') as fp:
         attachment.set_payload(fp.read())
     encoders.encode_base64(attachment)
-    attachment.add_header('Content-Disposition', 'attachment', filename=file_name)
+    attachment.add_header('Content-Disposition', 'attachment',
+                          filename=os.path.basename(file_name))
     return attachment
 
 
