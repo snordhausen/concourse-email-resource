@@ -72,7 +72,7 @@ def add_attachments(message, src, payload):
 
 def get_attachment(file_name):
     attachment = MIMEBase('application', 'octet-stream')
-    with open(file_name) as fp:
+    with open(file_name, 'rb') as fp:
         attachment.set_payload(fp.read())
     encoders.encode_base64(attachment)
     attachment.add_header('Content-Disposition', 'attachment', filename=file_name)
